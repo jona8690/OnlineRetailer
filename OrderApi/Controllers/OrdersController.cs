@@ -45,6 +45,12 @@ namespace OrderApi.Controllers
                 return BadRequest();
             }
 
+			// TODO Refactors
+			// Split into stages
+			// check if all the products are available first, if not return error
+			// Then increase items reserved. When ALL successfull, add the order
+
+
             // Call ProductApi to get the product ordered
             RestClient c = new RestClient();
             // You may need to change the port number in the BaseUrl below
