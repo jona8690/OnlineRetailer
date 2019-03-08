@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CustomerApi.Models;
 using CustomerApi.Repositores;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,20 +35,28 @@ namespace CustomerApi.Controllers
 
         // POST: api/Customer
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult Post([FromBody] Customer value)
         {
+			repository.Add(value);
+			return Ok();
         }
 
         // PUT: api/Customer/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public IActionResult Put(int id, [FromBody] Customer value)
         {
+			if (id != value.customerId) return BadRequest("Invalid customer id");
+
+			repository.Update(value);
+			return Ok();
         }
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+			repository.Delete(id);
+			return Ok();
         }
     }
 }
