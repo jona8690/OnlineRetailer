@@ -30,7 +30,7 @@ namespace CustomerApi {
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env) {
 
 			Task.Factory.StartNew(() =>
-				new MessageListener(app.ApplicationServices);
+				new MessageListener(app.ApplicationServices)
 			);
 
 			if (env.IsDevelopment()) {
