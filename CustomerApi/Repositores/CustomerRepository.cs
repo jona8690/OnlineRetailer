@@ -33,5 +33,9 @@ namespace CustomerApi.Repositores {
 			var item = this.Get(CustomerId);
 			db.Customers.Remove(item);
 		}
+
+		public bool Exists(int CustomerId) {
+			return db.Customers.Any(x => x.customerId == CustomerId);
+		}
 	}
 }
