@@ -9,7 +9,6 @@ namespace OrderApi.Models
         public DateTime? Date { get; set; }
         public List<OrderLine> OrderLines { get; set; }
 		public int CustomerId { get; set; }
-
 		public OrderStatus OrderStatus { get; set; }
     }
 }
