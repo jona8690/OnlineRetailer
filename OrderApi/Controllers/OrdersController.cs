@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
+using OrderApi.Infrastructure;
 using OrderApi.Models;
 using RestSharp;
 
@@ -11,10 +12,12 @@ namespace OrderApi.Controllers
     public class OrdersController : Controller
     {
         private readonly IRepository<Order> repository;
+		private IMessagePublisher messagePublisher;
 
-        public OrdersController(IRepository<Order> repos)
+        public OrdersController(IRepository<Order> repos, IMessagePublisher messagePublisher)
         {
             repository = repos;
+			this.messagePublisher = messagePublisher;
         }
 
         // GET: api/orders
@@ -45,7 +48,10 @@ namespace OrderApi.Controllers
                 return BadRequest();
             }
 
-			
+			var customerExists = messagePublisher.CustomerExists(order.CustomerId);
+			if (!customerExists) {
+				return BadRequest("Could not find any customers with that Id");
+			} else return Ok("TEST");
 
 			// If the order could not be created, "return no content".
 			return NoContent();

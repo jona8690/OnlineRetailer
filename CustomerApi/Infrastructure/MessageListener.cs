@@ -21,7 +21,7 @@ namespace CustomerApi.Infrastructure {
 				this.customerRepository = services.GetService<CustomerRepository>();
 
 				var config = services.GetService<IConfiguration>();
-				var connectionString = config.GetConnectionString("Rabbit");				
+				this.connectionString = config.GetConnectionString("Rabbit");				
 			}
 		}
 

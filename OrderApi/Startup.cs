@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderApi.Data;
+using OrderApi.Infrastructure;
 using OrderApi.Models;
 
 namespace OrderApi
@@ -31,6 +32,8 @@ namespace OrderApi
             services.AddTransient<IDbInitializer, DbInitializer>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+			services.AddSingleton<IMessagePublisher>(new MessagePublisher(Configuration.GetConnectionString("Rabbit")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

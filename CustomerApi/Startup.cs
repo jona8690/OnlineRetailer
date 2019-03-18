@@ -19,7 +19,10 @@ namespace CustomerApi {
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services) {
-			services.AddDbContext<CustomerApiContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("Primary")));
+			services.AddDbContext<CustomerApiContext>(opt => opt.UseInMemoryDatabase("CustomerDatabase"));
+
+			// Register database initializer for dependency injection
+			services.AddTransient<IDbInitializer, DbInitializer>();
 
 			services.AddScoped<CustomerRepository>();
 
@@ -28,6 +31,15 @@ namespace CustomerApi {
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env) {
+
+			// Initialize the database
+			using (var scope = app.ApplicationServices.CreateScope()) {
+				// Initialize the database
+				var services = scope.ServiceProvider;
+				var dbContext = services.GetService<CustomerApiContext>();
+				var dbInitializer = services.GetService<IDbInitializer>();
+				dbInitializer.Initialize(dbContext);
+			}
 
 			Task.Factory.StartNew(() =>
 				new MessageListener(app.ApplicationServices)
