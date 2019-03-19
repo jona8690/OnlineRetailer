@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
@@ -55,6 +55,22 @@ namespace OrderApi.Controllers
 
 			// If the order could not be created, "return no content".
 			return NoContent();
+        }
+
+        [HttpPost]
+        public IActionResult AcceptOrder([FromBody] Order order)
+        {
+
+            var customer = customerRepository.Get(order.CustomerId);
+            var customerGoodCredit = customer.creditStanding == creditStanding.Good;
+            if (!customerGoodCredit)
+            {
+                return BadRequest("Customer does not have a good enough credit standing for this purchase");
+            }
+            else return Ok("Order Accepted");
+
+            // If the order could not be accepted, "return no content".
+            return NoContent();
         }
 
     }
