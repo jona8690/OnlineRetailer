@@ -45,7 +45,7 @@ namespace ProductApi {
 			}
 
 			Task.Factory.StartNew(() =>
-				new MessageListener(app.ApplicationServices)
+				new MessageListener(app.ApplicationServices).Start()
 			);
 
 			if (env.IsDevelopment()) {
