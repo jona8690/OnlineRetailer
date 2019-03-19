@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using EasyNetQ;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProductApi.Data;
 using SharedModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ProductApi.Infrastructure {
@@ -19,6 +21,16 @@ namespace ProductApi.Infrastructure {
 
 				var config = services.GetService<IConfiguration>();
 				this.connectionString = config.GetConnectionString("Rabbit");
+			}
+		}
+
+		public void Start() {
+			using (var bus = RabbitHutch.CreateBus(connectionString)) {
+				bus.Respond<ProductInStockRequest, ProductInStockResponse>(request => ProductInStock(request));
+
+				lock (this) {
+					Monitor.Wait(this);
+				}
 			}
 		}
 
