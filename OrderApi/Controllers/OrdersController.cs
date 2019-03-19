@@ -51,9 +51,12 @@ namespace OrderApi.Controllers
 			var customerExists = messagePublisher.CustomerExists(order.CustomerId);
 			if (!customerExists) {
 				return BadRequest("Could not find any customers with that Id");
-			} else return Ok("TEST");
+			}
 
-			// If the order could not be created, "return no content".
+			
+			/// Running reverse if here, all negative cases make their own return.
+			/// If this statement is reached, all checks should have been processed, 
+			/// and the order approved.
 			return NoContent();
         }
 
