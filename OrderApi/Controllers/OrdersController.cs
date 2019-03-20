@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using CustomerApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
 using OrderApi.Infrastructure;
 using OrderApi.Models;
-using RestSharp;
 
 namespace OrderApi.Controllers
 {
@@ -12,12 +11,14 @@ namespace OrderApi.Controllers
     public class OrdersController : Controller
     {
         private readonly IRepository<Order> repository;
-		private IMessagePublisher messagePublisher;
+        private readonly IRepository<Customer> customerRepository;
+        private IMessagePublisher messagePublisher;
 
-        public OrdersController(IRepository<Order> repos, IMessagePublisher messagePublisher)
+        public OrdersController(IRepository<Order> repos, IMessagePublisher messagePublisher, IRepository<Customer> customerRepository)
         {
             repository = repos;
-			this.messagePublisher = messagePublisher;
+            this.messagePublisher = messagePublisher;
+            this.customerRepository = customerRepository;
         }
 
         // GET: api/orders
@@ -48,13 +49,15 @@ namespace OrderApi.Controllers
                 return BadRequest();
             }
 
-			var customerExists = messagePublisher.CustomerExists(order.CustomerId);
-			if (!customerExists) {
-				return BadRequest("Could not find any customers with that Id");
-			} else return Ok("TEST");
+            var customerExists = messagePublisher.CustomerExists(order.CustomerId);
+            if (!customerExists)
+            {
+                return BadRequest("Could not find any customers with that Id");
+            }
+            else return Ok("TEST");
 
-			// If the order could not be created, "return no content".
-			return NoContent();
+            // If the order could not be created, "return no content".
+            return NoContent();
         }
 
         [HttpPost]
