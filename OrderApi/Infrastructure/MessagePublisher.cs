@@ -23,5 +23,16 @@ namespace OrderApi.Infrastructure {
 		public void Dispose() {
 			bus.Dispose();
 		}
+
+		public bool ItemsInStock(int ProductId, int Quantity) {
+			var request = new ProductInStockRequest() {
+				ProductId = ProductId,
+				Quantity = Quantity
+			};
+
+			var response = bus.Request<ProductInStockRequest, ProductInStockResponse>(request);
+
+			return response.Instock;
+		}
 	}
 }

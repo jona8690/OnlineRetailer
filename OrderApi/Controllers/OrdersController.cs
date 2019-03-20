@@ -53,7 +53,14 @@ namespace OrderApi.Controllers
 				return BadRequest("Could not find any customers with that Id");
 			}
 
-			
+			foreach(var line in order.OrderLines) {
+				var instock = messagePublisher.ItemsInStock(line.ProductId, line.Quantity);
+				if(!instock) {
+					return BadRequest("A Product was not in stock.");
+				}
+			}
+
+
 			/// Running reverse if here, all negative cases make their own return.
 			/// If this statement is reached, all checks should have been processed, 
 			/// and the order approved.
