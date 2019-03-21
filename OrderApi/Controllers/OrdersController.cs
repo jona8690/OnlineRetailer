@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using CustomerApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
 using OrderApi.Infrastructure;
@@ -11,14 +10,12 @@ namespace OrderApi.Controllers
     public class OrdersController : Controller
     {
         private readonly IRepository<Order> repository;
-        private readonly IRepository<Customer> customerRepository;
         private IMessagePublisher messagePublisher;
 
-        public OrdersController(IRepository<Order> repos, IMessagePublisher messagePublisher, IRepository<Customer> customerRepository)
+        public OrdersController(IRepository<Order> repos, IMessagePublisher messagePublisher)
         {
             repository = repos;
             this.messagePublisher = messagePublisher;
-            this.customerRepository = customerRepository;
         }
 
         // GET: api/orders
@@ -61,11 +58,9 @@ namespace OrderApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult AcceptOrder([FromBody] Order order)
+        public IActionResult CustomerGoodStanding([FromBody] Order order)
         {
-
-            var customer = customerRepository.Get(order.CustomerId);
-            var customerGoodCredit = customer.creditStanding == creditStanding.Good;
+            var customerGoodCredit = messagePublisher.CustomerGoodStanding(order.CustomerId);
             if (!customerGoodCredit)
             {
                 return BadRequest("Customer does not have a good enough credit standing for this purchase");
