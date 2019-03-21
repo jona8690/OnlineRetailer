@@ -1,6 +1,8 @@
 ﻿using EasyNetQ;
+using OrderApi.Models;
 using SharedModels;
 using System;
+using System.Collections.Generic;
 
 namespace OrderApi.Infrastructure {
 	public class MessagePublisher : IMessagePublisher, IDisposable {
@@ -8,6 +10,10 @@ namespace OrderApi.Infrastructure {
 
 		public MessagePublisher(string ConnInfo) {
 			bus = RabbitHutch.CreateBus(ConnInfo);
+		}
+
+		public void Dispose() {
+			bus.Dispose();
 		}
 
 		public bool CustomerExists(int customerNo) {
@@ -20,10 +26,6 @@ namespace OrderApi.Infrastructure {
 			return response.Exists;
 		}
 
-		public void Dispose() {
-			bus.Dispose();
-		}
-
 		public bool ItemsInStock(int ProductId, int Quantity) {
 			var request = new ProductInStockRequest() {
 				ProductId = ProductId,
@@ -33,6 +35,25 @@ namespace OrderApi.Infrastructure {
 			var response = bus.Request<ProductInStockRequest, ProductInStockResponse>(request);
 
 			return response.Instock;
+		}
+
+		public void PlaceOrder(Order order) {
+			var message = new OrderShared {
+				Id = order.Id,
+				CustomerId = order.CustomerId,
+				Date = order.Date,
+				Items = new Dictionary<int, int>()
+			};
+
+			foreach (var item in order.OrderLines) {
+				message.Items.Add(item.ProductId, item.Quantity);
+			}
+
+			bus.Send("Orders", message);
+		}
+
+		internal void SendEmail(EmailMessage msg) {
+			bus.Send("email", msg);
 		}
 	}
 }

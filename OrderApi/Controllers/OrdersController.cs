@@ -64,7 +64,11 @@ namespace OrderApi.Controllers
 			/// Running reverse if here, all negative cases make their own return.
 			/// If this statement is reached, all checks should have been processed, 
 			/// and the order approved.
-			return NoContent();
+
+			messagePublisher.PlaceOrder(order);
+			order.OrderStatus = OrderStatus.completed;
+
+			return Ok("Order has been placed. Await shipment");
         }
 
     }

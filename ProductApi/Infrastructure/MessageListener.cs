@@ -14,11 +14,13 @@ namespace ProductApi.Infrastructure {
 	public class MessageListener {
 		private string connectionString;
 		private IRepository<Product> productRepository;
+		private MessagePublisher messagePublisher;
 
 		public MessageListener(IServiceProvider provider) {
 			using (var scope = provider.CreateScope()) {
 				var services = scope.ServiceProvider;
 				this.productRepository = services.GetService<ProductRepository>();
+				this.messagePublisher = services.GetService<MessagePublisher>();
 
 				var config = services.GetService<IConfiguration>();
 				this.connectionString = config.GetConnectionString("Rabbit");
@@ -28,6 +30,7 @@ namespace ProductApi.Infrastructure {
 		public void Start() {
 			using (var bus = RabbitHutch.CreateBus(connectionString)) {
 				bus.Respond<ProductInStockRequest, ProductInStockResponse>(request => ProductInStock(request));
+				bus.Receive<OrderShared>("Orders", msg => Fulfill(msg));
 
 				lock (this) {
 					Monitor.Wait(this);
@@ -44,6 +47,16 @@ namespace ProductApi.Infrastructure {
 			else response.Instock = false;
 
 			return response;
+		}
+
+		private void Fulfill(OrderShared order) {
+			foreach(var item in order.Items) {
+				var product = productRepository.Get(item.Key);
+
+				product.ItemsReserved += item.Value;
+			}
+
+			messagePublisher.OrderFulfilled(order);
 		}
 	}
 }
