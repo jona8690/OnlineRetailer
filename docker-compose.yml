@@ -4,7 +4,7 @@ services:
   customerapi:
     image: ${DOCKER_REGISTRY-}customerapi
     ports:
-      - "5000:443"
+      - "5001:443"
     build:
       context: .
       dockerfile: CustomerApi/Dockerfile
@@ -12,17 +12,23 @@ services:
   orderapi:
     image: ${DOCKER_REGISTRY-}orderapi
     ports:
-      - "5001:443"
+      - "5002:443"
     build:
       context: .
       dockerfile: OrderApi/Dockerfile
 
-
   productapi:
     image: ${DOCKER_REGISTRY-}productapi
     ports:
-      - "5002:443"
+      - "5003:443"
     build:
       context: .
       dockerfile: ProductApi/Dockerfile
 
+    Gateway:
+    image: ${DOCKER_REGISTRY-}gateway
+    ports:
+      - "5000:443"
+    build:
+      context: .
+      dockerfile: Gateway/Dockerfile
