@@ -25,7 +25,7 @@ services:
       context: .
       dockerfile: ProductApi/Dockerfile
 
-    Gateway:
+  gateway:
     image: ${DOCKER_REGISTRY-}gateway
     ports:
       - "5000:443"
