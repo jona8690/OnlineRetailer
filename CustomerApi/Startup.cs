@@ -26,6 +26,8 @@ namespace CustomerApi {
 
 			services.AddScoped<CustomerRepository>();
 
+			services.AddSingleton<MessagePublisher>();
+
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 		}
 

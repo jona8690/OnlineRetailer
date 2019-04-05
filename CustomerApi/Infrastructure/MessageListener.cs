@@ -14,11 +14,13 @@ namespace CustomerApi.Infrastructure {
 
 		private string connectionString;
 		private CustomerRepository customerRepository;
+		private MessagePublisher messagePublisher;
 
 		public MessageListener(IServiceProvider provider) {
 			using (var scope = provider.CreateScope()) {
 				var services = scope.ServiceProvider;
 				this.customerRepository = services.GetService<CustomerRepository>();
+				this.messagePublisher = services.GetService<MessagePublisher>();
 
 				var config = services.GetService<IConfiguration>();
 				this.connectionString = config.GetConnectionString("Rabbit");				
@@ -28,6 +30,7 @@ namespace CustomerApi.Infrastructure {
 		public void Start() {
 			using (var bus = RabbitHutch.CreateBus(connectionString)) {
 				bus.Respond<CustomerExistsRequest, CustomerExistsResponse>(request => CustomerExists(request));
+
 
 				lock (this) {
 					Monitor.Wait(this);
@@ -45,6 +48,17 @@ namespace CustomerApi.Infrastructure {
 			} else response.Exists = false;
 
 			return response;
+		}
+
+		private void ShipOrder(OrderFulfilled order) {
+			var customer = customerRepository.Get(order.CustomerId);
+			var msg = new EmailMessage();
+
+			msg.To = customer.email;
+			msg.Topic = "Order Shipped";
+			msg.Message = "Your Order #" + order.OrderId + " has now been shipped";
+
+			messagePublisher.SendEmail(msg);
 		}
 	}
 }
